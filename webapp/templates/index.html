@@ -1,10 +1,82 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
+    <div>
+        <input type="number" id="number1" placeholder="Введите первое число">
+        <input type="number" id="number2" placeholder="Введите второе число">
+    </div>
+    <div>
+        <button onclick="calculate('add')">Сложить</button>
+        <button onclick="calculate('subtract')">Вычесть</button>
+        <button onclick="calculate('multiply')">Умножить</button>
+        <button onclick="calculate('divide')">Разделить</button>
+    </div>
+    <div id="result" class="result"></div>
+    <script>
+        function calculate(operation) {
+            let number1 = document.getElementById('number1').value;
+            let number2 = document.getElementById('number2').value;
+            console.log(number1);
+            console.log(`/api/v1/${operation}/`);
 
+            fetch(`/api/v1/${operation}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ 'A': Number(number1), 'B': Number(number2) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById('result');
+                if (data.answer !== undefined) {
+                    resultDiv.textContent = `Ответ: ${data.answer}`;
+                    resultDiv.className = 'result success';
+                } else if (data.error) {
+                    resultDiv.textContent = `Ошибка: ${data.error}`;
+                    resultDiv.className = 'result error';
+                }
+            })
+            .catch(error => {
+                let resultDiv = document.getElementById('result');
+                resultDiv.textContent = `Ошибка: ${error}`;
+                resultDiv.className = 'result error';
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
 </body>
 </html>
