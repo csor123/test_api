@@ -45,3 +45,4 @@ def calculate(request, operation):
 
     except (ValueError, KeyError) as e:
         return JsonResponse({"error": str(e)}, status=400)
+
